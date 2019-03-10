@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html ng-app = "timerModule">
+  <head>
+      <script src="js/angular.min.js"></script>
+      <style>
+      * {
+        margin: 0px;
+        padding: 0px;
+        outline: 0px;
+        font-family: arial;
+      }
+      body {
+        background-color: black;
+      }
+      #outerTimerCircle {
+        height: 290px;
+        width: 290px;
+        border-radius: 150px;
+        position: absolute; top: 250px; left: 50%;
+        margin-top: -145px;
+        margin-left: -145px;
+        z-index:1;
+      }
+      #innerTimerCircle {
+        height: 260px;
+        width: 260px;
+        background-color: black;
+        border-radius: 150px;
+        position:absolute; top: 250px; left: 50%;
+        margin-top: -130px;
+        margin-left: -130px;
+        float:left;
+        z-index:2;
+      }
+      #timerText {
+        width:260px;
+        position: absolute; left: 50%;
+        margin-top: 120px;
+        font-weight: bold;
+        z-index: 5;
+      }
+      #miniText {
+        color: #00D4FF;
+        font-size: 25pt;
+        float:left;
+      }
+      #bigText span {
+        color: white;
+        float: left;
+      }
+      #startBtn, #resetBtn {
+        height:100px;
+        width:100px;
+        border-radius: 50px;
+        font-size: 16pt;
+        font-weight: bold;
+        position: absolute; left: 50%;
+        margin-left: -50px;
+        top: 290px;
+        cursor:pointer;
+        border: 0px;
+        color:white;
+      }
+      #resetBtn {
+        top: 400px;
+        background-color: #555555;
+      }
+      #startBtn:active, #resetBtn:active {
+        color: black;
+      }
+      #startBtn:hover, #resetBtn:hover {
+        border: 2px solid white;
+      }
+      #rotator {
+        height: 290px;
+        width: 28px;
+        position: absolute;
+        top: 0%;
+        left: 50%;
+        margin-left: -14px;
+        background-image: linear-gradient(#04b7db, white);
+        background-image: -o-linear-gradient(#04b7db, white);
+        background-image: -moz-linear-gradient(#04b7db, white);
+        background-image: -webkit-linear-gradient(#04b7db, white);
+      }
+      </style>
+  </head>
+  <body ng-controller="timerController">
+    <div id="timerText" style='margin-left:{{timerDisplay.timerLeft}};top:{{timerDisplay.timerTop}}'>
+      <span id="bigText" style='font-size:{{timerDisplay.timerFontSize}}'><span style='transform: rotate3d(1, 0, 0, {{timerDisplay.tenMinuteRotation}}deg);display:{{timerDisplay.tenMinuteDisplay}}'>{{timerNumbers.tenMinutes}}</span><span style='transform: rotate3d(1, 0, 0, {{timerDisplay.singleMinuteRotation}}deg);display:{{timerDisplay.singleMinuteDisplay}}'>{{timerNumbers.singleMinutes}}</span><span style='display:{{timerDisplay.singleMinuteDisplay}}'>:</span><span style='transform: rotate3d(1, 0, 0,{{timerDisplay.tenSecondRotation}}deg);display:{{timerDisplay.tenSecondDisplay}}'>{{timerNumbers.tenSeconds}}</span><span style='transform: rotate3d(1, 0, 0, {{timerDisplay.singleSecondRotation}}deg);'>{{timerNumbers.singleSeconds}}</span></span><span id=miniText style=margin-top:{{timerDisplay.miniTextTop}}>{{timerNumbers.tenthSeconds}}{{timerNumbers.hundrethSeconds}}</span>
+    </div>
+    <div id="outerTimerCircle" style='background-color:{{timerDisplay.outerTimerCircleColor}}'>
+      <div id="rotator" style='display:{{timerDisplay.rotatorDisplay}};transform:rotate({{timerDisplay.rotatorDegrees}}deg)'></div>
+    </div>
+    <div id="innerTimerCircle">
+      <button id="startBtn"  ng-click="startTimer('clicked')" style='background-color:{{timerDisplay.buttonColor}}'>{{timerDisplay.startText}}</button>
+      <button id="resetBtn"  ng-click="resetTimer()" style='display:{{timerDisplay.resetBtnDisplay}}'>RESET</button>
+    </div>
+  </body>
+      <script>
+          var myApp = angular.module("timerModule",[]);
+          myApp.controller("timerController",function($scope, $timeout){
+            var myTimer = "";
+            var timerNumbers = {
+              hundrethSeconds : 0,
+              tenthSeconds : 0,
+              singleSeconds : 0,
+              tenSeconds: 0,
+              singleMinutes: 0,
+              tenMinutes: 0
+            }
+            var timerDisplay = {
+              outerTimerCircleColor: "#555555",
+              resetBtnDisplay: "none",
+              rotatorDisplay: "none",
+              rotatorDegrees: 0,
+              buttonColor: "#04b7db",
+              startText : "START",
+              timerFontSize: "100pt",
+              timerTop: "58px",
+              timerLeft: "-50px",
+              miniTextTop: "93px",
+              tenSecondDisplay: "none",
+              singleMinuteDisplay: "none",
+              tenMinuteDisplay: "none",
+              singleSecondRotation: 0,
+              tenSecondRotation: 0,
+              singleMinuteRotation: 0,
+              tenMinuteRotation: 0
+            }
+            $scope.timerNumbers = timerNumbers;
+            $scope.timerDisplay = timerDisplay;
+            $scope.rotation = (r) => {
+              if (timerDisplay[r] == 360) {
+                timerDisplay[r] = 0;
+                return;
+              }
+              timerDisplay[r] += 18;
+              rotationTimer = $timeout($scope.rotation,10,false,r);
+            }
+            $scope.resetTimer = () => {
+                angular.forEach(timerNumbers, (value, key) => {
+                  timerNumbers[key] = 0;
+                })
+                timerDisplay.rotatorDegrees = 0;
+                timerDisplay.timerFontSize = "100pt";
+                timerDisplay.timerTop = "58px";
+                timerDisplay.timerLeft = "-50px";
+                timerDisplay.miniTextTop = "94px";
+                timerDisplay.tenSecondDisplay = "none";
+                timerDisplay.singleMinuteDisplay = "none";
+                timerDisplay.tenMinuteDisplay = "none";
+                timerDisplay.resetBtnDisplay = "none";
+            }
+            $scope.startTimer = (e) => {
+              if (e == "clicked" && timerDisplay.startText == "START") {
+                timerDisplay.outerTimerCircleColor = "white";
+                timerDisplay.buttonColor = "#ff2626";
+                timerDisplay.startText = "STOP";
+                timerDisplay.rotatorDisplay = "block";
+                timerDisplay.resetBtnDisplay = "none";
+                $scope.startTimer();
+                return;
+              }
+              if (e == "clicked" && timerDisplay.startText == "STOP") {
+                timerDisplay.outerTimerCircleColor = "#555555";
+                timerDisplay.singleSecondRotation = 0;
+                timerDisplay.tenSecondRotation = 0;
+                timerDisplay.singleMinuteRotation = 0;
+                timerDisplay.tenMinuteRotation = 0;
+                timerDisplay.buttonColor = "#04b7db";
+                timerDisplay.startText = "START";
+                timerDisplay.rotatorDisplay = "none";
+                timerDisplay.resetBtnDisplay = "block";
+                $scope.startTimer();
+                return;
+              }
+              if (timerDisplay.startText == "STOP") {
+                timerNumbers.hundrethSeconds++;
+                timerDisplay.rotatorDegrees = timerDisplay.rotatorDegrees == 360 ? 0 : timerDisplay.rotatorDegrees + 3.6;
+                if (timerNumbers.hundrethSeconds == 10) {
+                  timerNumbers.hundrethSeconds = 0;
+                  timerNumbers.tenthSeconds++;
+                  if (timerNumbers.tenthSeconds == 10) {
+                    timerNumbers.tenthSeconds = 0;
+                    timerNumbers.singleSeconds++;
+                    $scope.rotation("singleSecondRotation");
+                    if (timerNumbers.singleSeconds == 10) {
+                      timerDisplay.timerLeft = timerDisplay.tenSecondDisplay == "none" ? "-88px" : timerDisplay.timerLeft;
+                      timerDisplay.tenSecondDisplay = "inline";
+                      timerNumbers.singleSeconds = 0;
+                      timerNumbers.tenSeconds++;
+                      $scope.rotation("tenSecondRotation");
+                      if (timerNumbers.tenSeconds == 6){
+                        timerDisplay.timerFontSize =  timerDisplay.tenMinuteDisplay == "none" ? "75pt" : "60pt";
+                        timerDisplay.timerTop = timerDisplay.tenMinuteDisplay == "none" ? "74px" : "88px";
+                        timerDisplay.timerLeft = timerDisplay.singleMinuteDisplay == "none" ? "-120px" : timerDisplay.timerLeft;
+                        timerDisplay.miniTextTop = timerDisplay.singleMinuteDisplay == "none" ? "63px" : timerDisplay.miniTextTop;
+                        timerDisplay.singleMinuteDisplay = "inline";
+                        timerNumbers.tenSeconds = 0;
+                        timerNumbers.singleMinutes++;
+                        $scope.rotation("singleMinuteRotation");
+                        if (timerNumbers.singleMinutes == 10) {
+                          timerDisplay.tenMinuteDisplay = "inline";
+                          timerDisplay.timerFontSize = "60pt";
+                          timerDisplay.timerTop = "88px";
+                          timerDisplay.miniTextTop = "44px";
+                          timerNumbers.singleMinutes = 0;
+                          timerNumbers.tenMinutes++;
+                          $scope.rotation("tenMinuteRotation");
+                        }
+                      }
+                    }
+                  }
+                }
+                myTimer = $timeout($scope.startTimer,10);
+              }
+            }
+          });
+      </script>
+</html>
